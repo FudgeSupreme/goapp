@@ -68,6 +68,7 @@ window.addEventListener("load", function(evt) {
 You can change the message and send multiple times.
 <p>
 <form>
+<input type="hidden" name="csrf_token" value="{{ .csrfToken }}">
 <button id="open">Open</button>
 <button id="close">Close</button>
 <p><input id="input" type="text" value="{}">

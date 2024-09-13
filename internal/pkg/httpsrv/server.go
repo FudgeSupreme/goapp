@@ -2,7 +2,9 @@ package httpsrv
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
+	"github.com/gorilla/csrf"
 	"log"
 	"net/http"
 	"os"
@@ -53,13 +55,15 @@ func (s *Server) Start() error {
 		}
 	}
 
+	csrfKey := s.generateCSRFKey()
+
 	// Create HTTP server.
 	s.server = &http.Server{
 		Addr:         "localhost:8080",
 		WriteTimeout: 10 * time.Second,
 		ReadTimeout:  10 * time.Second,
 		IdleTimeout:  10 * time.Second,
-		Handler:      handlers.CombinedLoggingHandler(os.Stdout, r),
+		Handler:      handlers.CombinedLoggingHandler(os.Stdout, csrf.Protect(csrfKey)(r)),
 	}
 
 	// Start HTTP server.
@@ -100,4 +104,13 @@ func (s *Server) mainLoop() {
 			return
 		}
 	}
+}
+
+func (s *Server) generateCSRFKey() []byte {
+	key := make([]byte, 32)
+	_, err := rand.Read(key)
+	if err != nil {
+		log.Printf("error: %v\n", err)
+	}
+	return key
 }
