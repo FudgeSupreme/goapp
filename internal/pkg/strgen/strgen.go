@@ -1,7 +1,10 @@
 package strgen
 
 import (
-	"goapp/pkg/util"
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"log"
 	"sync"
 	"time"
 )
@@ -38,11 +41,26 @@ func (s *StringGenerator) mainLoop() {
 
 	for {
 		select {
-		case s.strChan <- util.RandString(10):
 		case <-s.quitChannel:
 			return
 		default:
+			hexValue, err := s.generateHexValues(5)
+			if err != nil {
+				log.Printf("%v\n", err)
+			} else {
+				s.strChan <- hexValue
+			}
 		}
 		time.Sleep(1 * time.Second)
 	}
+}
+
+// Generate a hex value using the crypto/rand package
+func (s *StringGenerator) generateHexValues(valueLen int) (string, error) {
+	bytes := make([]byte, valueLen)
+	_, err := rand.Read(bytes)
+	if err != nil {
+		return "", fmt.Errorf("could not generate hex value because of %v", err)
+	}
+	return hex.EncodeToString(bytes), nil
 }
