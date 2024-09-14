@@ -12,3 +12,7 @@ goapp:
 clean:
 	go clean
 	rm -f bin/*
+
+.PHONY: cli
+cli:
+	go build -o bin ./cmd/cli
